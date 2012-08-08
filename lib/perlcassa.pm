@@ -736,8 +736,13 @@ sub get() {
 	my $packedkey = $self->_pack_values(\%keyhash, $column_family, 'key');
 
 	my $res = $self->_get_column($column_family, $column, $key, $consistencylevel);
+	my $data = $res->{column} || $res->{counter_column};
 
-	my $value = $self->_unpack_value(packedstr => $res->{column}->{value}, mode => 'value_validation');
+	my $value = $self->_unpack_value(
+		packedstr => $data->{value},
+		columnfamily => $column_family,
+		mode => 'value_validation'
+	);
 
 	return $value;
 }
@@ -836,7 +841,12 @@ sub multiget_slice {
 	while(my($k,$v) = each %{ $res // {} }) {
 		my %cols;
 		foreach(@{ $v // [] }) {
-			$cols{$_->{column}->{name}} = $self->_unpack_value(packedstr => $_->{column}->{value}, mode => 'value_validation');
+			my $data = $_->{column} || $_->{counter_column};
+			$cols{$data->{name}} = $self->_unpack_value(
+				packedstr => $data->{value},
+				columnfamily => $column_family,
+				mode => 'value_validation'
+			);
 		}
 		$r->{$k}  = \%cols;
 	}
