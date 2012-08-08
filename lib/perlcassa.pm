@@ -576,7 +576,7 @@ sub _call() {
 		unless ($thrift_operation eq 'add') {
 			# pack the value to comply with the default column family validator on this column family
 			my %valuehash = ('values' => [$value]);
-			$packedvalue = $self->_pack_values(\%valuehash, $columnfamily, 'value');
+			$packedvalue = $self->_pack_values(\%valuehash, $columnfamily, 'value', $name);
 		}
 	}
 
@@ -599,7 +599,7 @@ sub _call() {
 		# first create the column	
 		my $column = new Cassandra::Column();
 		$column->{name} = $name;
-		$column->{value} = $value;
+		$column->{value} = $packedvalue;
 		$column->{timestamp} = time;
 
 		if(defined($ttl)){
@@ -644,6 +644,7 @@ sub bulk_insert() {
 			$packedbulk{$value} = @{$columns{$value}}[0];
 		} else {
 			my %valuehash = ('values' => \@{$columns{$value}});
+			# TODO fix this call to _pack_values
 			my $packedvalue = $self->_pack_values(\%valuehash, $columnfamily, 'value');
 
 			my %columnhash = ('values' => [$value]);
@@ -739,6 +740,7 @@ sub get() {
 	my $data = $res->{column} || $res->{counter_column};
 
 	my $value = $self->_unpack_value(
+		name => [$data->{name}],
 		packedstr => $data->{value},
 		columnfamily => $column_family,
 		mode => 'value_validation'
@@ -843,6 +845,7 @@ sub multiget_slice {
 		foreach(@{ $v // [] }) {
 			my $data = $_->{column} || $_->{counter_column};
 			$cols{$data->{name}} = $self->_unpack_value(
+				name => [$data->{name}],
 				packedstr => $data->{value},
 				columnfamily => $column_family,
 				mode => 'value_validation'
@@ -879,7 +882,7 @@ sub _do_multiget_slice_with_timeout {
 # _pack_values(\%composite, 'mycf'); 
 #####################################################################################################
 sub _pack_values() {
-	my ($self, $composite, $columnfamily, $type) = @_;
+	my ($self, $composite, $columnfamily, $type, $columnname) = @_;
 	my %composite = %$composite;
 
 	# if a array of validation classes has been passed in with the name hash, use that, otherwise, determine it from the keyspace definition
@@ -887,7 +890,11 @@ sub _pack_values() {
 	if (defined($type) && $type eq 'key') {
 		@validationComparators = @{$self->{key_validation}{$columnfamily}};
 	} elsif (defined($type) && $type eq 'value') {
-		@validationComparators = @{$self->{value_validation}{$columnfamily}};
+		if (defined($columnname) && defined($self->{metadata_validation}{$columnfamily}{$columnname})) {
+			@validationComparators = $self->{metadata_validation}{$columnfamily}{$columnname};
+		} else {
+			@validationComparators = @{$self->{value_validation}{$columnfamily}};
+		}
 	} else {
 		@validationComparators = @{$self->{comparators}{$columnfamily}};
 	}
