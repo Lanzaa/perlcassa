@@ -153,6 +153,11 @@ our %validation_map = (
 	'UUIDType'	=> 'S'
 );
 
+# Get the time in microsecond precision
+sub ustime {
+    return int(1000*1000*time());
+}
+
 sub new() {
 	my ($class, %opt) = @_;
 
@@ -592,7 +597,7 @@ sub _call() {
 		$client->add($packedkey, $column_parent, $countercolumn, $consistencylevel);
 	} elsif ($thrift_operation eq 'remove') { 
 
-		$client->remove($packedkey, $column_parent, time, $consistencylevel);
+		$client->remove($packedkey, $column_parent, ustime, $consistencylevel);
 	} else {
 		my @mutations;
 
@@ -600,7 +605,7 @@ sub _call() {
 		my $column = new Cassandra::Column();
 		$column->{name} = $name;
 		$column->{value} = $packedvalue;
-		$column->{timestamp} = time;
+		$column->{timestamp} = ustime;
 
 		if(defined($ttl)){
 			$column->{ttl} = $ttl; 
@@ -661,7 +666,7 @@ sub bulk_insert() {
 		my $column = new Cassandra::Column();
 		$column->{name} = $key;
 		$column->{value} = $packedbulk{$key};
-		$column->{timestamp} = time;
+		$column->{timestamp} = ustime;
 
 		# create a ColumnOrSuperColumn object to put the Column in
 		my $c_or_sc = new Cassandra::ColumnOrSuperColumn();
@@ -1396,6 +1401,7 @@ sub _deserialize_column_array() {
 		# remove expired columns from returned results unless overridden by 'return_expired' in opts:
 		if (defined($result->{column}{timestamp}) && defined($result->{column}{ttl})) {
 			my $expiretime = $result->{column}{timestamp} + $result->{column}{ttl};
+            # XXX TODO may be a bug to compare timestamp with ttl. ttl in seconds, time stamp in milliseconds?
 			if ($expiretime < time && $return_expired != 1) {
 				next;
 			}
