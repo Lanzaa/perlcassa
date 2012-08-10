@@ -54,9 +54,9 @@ $obj->get_range_slices(
 );
 
 my %bulk = (
-	#value => [columnname]
-	'test'  => ['name_pt1', 'name_pt2'],
-	'test2' => ['name_pt3', 'name_pr4']
+	# 'columnname' => 'value'
+	'column1' => 'value1',
+	'column2' => 'value2',
 );
 
 $obj->bulk_insert(
