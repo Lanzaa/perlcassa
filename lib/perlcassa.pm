@@ -641,19 +641,17 @@ sub bulk_insert() {
 	$self->client_setup('keyspace' => $keyspace, 'columnfamily' => $columnfamily);
 	my $client = $self->{client};
 
-
 	my %columns = %$columns;
 	my %packedbulk;
 	foreach my $value (sort(keys(%columns))) {
 		if ($self->{donotpack} == 1) {
 			$packedbulk{$value} = @{$columns{$value}}[0];
 		} else {
-			my %valuehash = ('values' => \@{$columns{$value}});
-			# TODO fix this call to _pack_values
-			my $packedvalue = $self->_pack_values(\%valuehash, $columnfamily, 'value');
-
 			my %columnhash = ('values' => [$value]);
 			my $packedname = $self->_pack_values(\%columnhash, $columnfamily, 'column');
+
+			my %valuehash = ('values' => [$columns{$value}]);
+			my $packedvalue = $self->_pack_values(\%valuehash, $columnfamily, 'value', $packedname);
 		
 			$packedbulk{$packedname} = $packedvalue;
 		}
