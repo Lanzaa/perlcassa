@@ -10,59 +10,59 @@ v0.03
 
 =head1 SYNOPSIS
 
-use perlcassa;
-
-my $obj = new perlcassa(
-	'columnfamily' 	=> 'myCF',
-	'keyspace' 	=> 'myKeyspace',
-	'hosts'		=> ['host1.cassandra.local', 'host2.cassandra.local', 'host3.cassandra.local'],
+	use perlcassa;
 	
-	#optional
-	'write_consistency_level' => Cassandra::ConsistencyLevel::QUORUM,
-	'read_consistency_level'  => Cassandra::ConsistencyLevel::QUORUM,
-	'port'			  => '9160'
-);
-
-my %composite = ('values' => ['name_pt1', 'name_pt2']);
-
-$obj->insert(
-	'key'		=> 'myKey',
-	'columnname'	=> \%composite,
-	'value'		=> 'myVal'
-);
-
-$obj->get(
-	'key'		=> 'myKey',
-	'columnname'	=> 'myColumn'
-);
-
-$obj->get_slice(
-	'key'		=> 'myKey',
-	'start'		=> ['name_pt1'],
-	'finish'	=> ['name_pt2','name_pt2_c'],
-	'start_equality' => 'equal', #optional (defaults to equal, options: equal, less_than_equal, or greater_than_equal)
-	'finish_equality'=> 'greater_than_equal' #optional (defaults to greater_than_equal, options: equal, less_than_equal, or greater_than_equal)
-);
-
-$obj->get_range_slices(
-	key_start => '',
-	key_finish => '',
-	column_start => ['colpt1','a'],
-	column_finish => ['thiscol'],
-	key_max_count => 10000,
-	buffer_size => 100
-);
-
-my %bulk = (
-	# 'columnname' => 'value'
-	'column1' => 'value1',
-	'column2' => 'value2',
-);
-
-$obj->bulk_insert(
-	'key'	  => 'testkey'
-	'columns' => \%bulk
-);
+	my $obj = new perlcassa(
+		'columnfamily' 	=> 'myCF',
+		'keyspace' 	=> 'myKeyspace',
+		'hosts'		=> ['host1.cassandra.local', 'host2.cassandra.local', 'host3.cassandra.local'],
+		
+		#optional
+		'write_consistency_level' => Cassandra::ConsistencyLevel::QUORUM,
+		'read_consistency_level'  => Cassandra::ConsistencyLevel::QUORUM,
+		'port'			  => '9160'
+	);
+	
+	my %composite = ('values' => ['name_pt1', 'name_pt2']);
+	
+	$obj->insert(
+		'key'		=> 'myKey',
+		'columnname'	=> \%composite,
+		'value'		=> 'myVal'
+	);
+	
+	$obj->get(
+		'key'		=> 'myKey',
+		'columnname'	=> 'myColumn'
+	);
+	
+	$obj->get_slice(
+		'key'		=> 'myKey',
+		'start'		=> ['name_pt1'],
+		'finish'	=> ['name_pt2','name_pt2_c'],
+		'start_equality' => 'equal', #optional (defaults to equal, options: equal, less_than_equal, or greater_than_equal)
+		'finish_equality'=> 'greater_than_equal' #optional (defaults to greater_than_equal, options: equal, less_than_equal, or greater_than_equal)
+	);
+	
+	$obj->get_range_slices(
+		key_start => '',
+		key_finish => '',
+		column_start => ['colpt1','a'],
+		column_finish => ['thiscol'],
+		key_max_count => 10000,
+		buffer_size => 100
+	);
+	
+	my %bulk = (
+		# 'columnname' => 'value'
+		'column1' => 'value1',
+		'column2' => 'value2',
+	);
+	
+	$obj->bulk_insert(
+		'key'	  => 'testkey'
+		'columns' => \%bulk
+	);
 
 =head1 REQUIRES
 
@@ -90,6 +90,7 @@ Note: This package does not support SuperColumns. Please look into CompositeType
 Creates a new Apache Cassandra Perl Client
 
 =back
+
 =head1 TODO
 
 * better documentation
