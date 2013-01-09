@@ -1,0 +1,7 @@
+
+These tests are very poorly written and assume an available cassandra server at
+localhost with the default port. It also assumes the existence of its keyspace
+and column family.
+
+These issues should be fixed.
+
