@@ -318,9 +318,6 @@ sub exec() {
     my $params = shift;
     my $attr = shift;# || {};
 
-    print "attr: ".Dumper($attr);
-    print "params: ".Dumper($params);
-
     # TODO prepare output handle
 
     # Bind parameters

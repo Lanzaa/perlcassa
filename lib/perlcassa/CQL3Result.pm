@@ -46,18 +46,12 @@ sub process_cql3_results {
 
     $self->{type} = $response->{type};
     if ($self->{type} == Cassandra::CqlResultType::ROWS) {
-        # TODO
-        #die("[ERROR] Not implemented CqlResultType::ROWS.");
-
-        #TODO parse the schema
-        # $response->{schema}
         # py cql parses the schema to get a decoder stored
         my $decoder = make_cql3_decoder($response->{schema});
 
-        # populate the decoder with data from the first result row
-        # it should have all of the columns
         $self->{result} = [];
-        $self->{rowcount} = $#{$response->{rows}};
+        $self->{rowcount} = scalar(@{$response->{rows}});
+        # Decode each row into a result
         foreach my $row (@{$response->{rows}}) {
             my %unpacked_row = $decoder->decode_row($row);
             push($self->{result}, \%unpacked_row);
